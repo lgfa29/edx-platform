@@ -37,20 +37,20 @@ site_status_msg = get_site_status_msg(course_id)
 </%block>
 
 <header class="${"global slim" if course and not disable_courseware_header else "global-new"}" aria-label="Main" role="banner">
+  <h1 class="logo" itemscope="" itemtype="http://schema.org/Organization">
+    <a href="${marketing_link('ROOT')}" title="Home page" itemprop="url">
+      <%block name="navigation_logo">
+          <img src="${static.url(branding.get_logo_url())}" alt="${platform_name()}" title="${platform_name()}" itemprop="url" />
+      </%block>
+    </a>
+  </h1>
+
+  % if course and not disable_courseware_header:
+  <h2><span class="provider">${course.display_org_with_default | h}:</span> ${course.display_number_with_default | h} ${course.display_name_with_default}</h2>
+  % endif
+
+  % if user.is_authenticated():
   <nav aria-label="Main">
-    <h1 class="logo" itemscope="" itemtype="http://schema.org/Organization">
-      <a href="${marketing_link('ROOT')}" title="Home page" itemprop="url">
-        <%block name="navigation_logo">
-            <img src="${static.url(branding.get_logo_url())}" alt="${platform_name()}" title="${platform_name()}" itemprop="url" />
-        </%block>
-      </a>
-    </h1>
-
-    % if course and not disable_courseware_header:
-    <h2><span class="provider">${course.display_org_with_default | h}:</span> ${course.display_number_with_default | h} ${course.display_name_with_default}</h2>
-    % endif
-
-    % if user.is_authenticated():
     <div class="left nav-global authenticated">
       <%block name="navigation_global_links_authenticated">
           <li class="nav-global-01">
@@ -64,40 +64,42 @@ site_status_msg = get_site_status_msg(course_id)
           </li>
       </%block>
     </div>
+  </nav>
 
-    <ol class="user">
-      <li class="primary">
-        <a href="${reverse('dashboard')}" class="user-link">
-          <i class="icon fa fa-home" aria-hidden="true"></i>
-          <span class="sr">${_("Dashboard for:")}</span>
-          <div>
-          ${user.username}
-          </div>
-        </a>
-      </li>
-      <li class="primary">
-        <a href="#" class="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr">${_("More options dropdown")}</span> &#9662;</a>
-        <ul class="dropdown-menu" aria-label="More Options" role="menu">
-          <%block name="navigation_dropdown_menu_links" >
-            % if settings.MKTG_URL_LINK_MAP.get('FAQ'):
-              <li><a href="${marketing_link('FAQ')}">${_("Help")}</a></li>
-            % endif
-          </%block>
-          <li><a href="${reverse('logout')}" role="menuitem">${_("Sign out")}</a></li>
-        </ul>
-      </li>
-    </ol>
+  <ol class="user">
+    <li class="primary">
+      <a href="${reverse('dashboard')}" class="user-link">
+        <i class="icon fa fa-home" aria-hidden="true"></i>
+        <span class="sr">${_("Dashboard for:")}</span>
+        <div>
+        ${user.username}
+        </div>
+      </a>
+    </li>
+    <li class="primary">
+      <a href="#" class="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr">${_("More options dropdown")}</span> &#9662;</a>
+      <ul class="dropdown-menu" aria-label="More Options" role="menu">
+        <%block name="navigation_dropdown_menu_links" >
+          % if settings.MKTG_URL_LINK_MAP.get('FAQ'):
+            <li><a href="${marketing_link('FAQ')}">${_("Help")}</a></li>
+          % endif
+        </%block>
+        <li><a href="${reverse('logout')}" role="menuitem">${_("Sign out")}</a></li>
+      </ul>
+    </li>
+  </ol>
 
-      % if should_display_shopping_cart_func(): # see shoppingcart.context_processor.user_has_cart_context_processor
-        <ol class="user">
-          <li class="primary">
-            <a class="shopping-cart" href="${reverse('shoppingcart.views.show_cart')}">
-              <i class="icon fa fa-shopping-cart"></i> ${_("Shopping Cart")}
-            </a>
-          </li>
-        </ol>
-      % endif
-    % else:
+    % if should_display_shopping_cart_func(): # see shoppingcart.context_processor.user_has_cart_context_processor
+      <ol class="user">
+        <li class="primary">
+          <a class="shopping-cart" href="${reverse('shoppingcart.views.show_cart')}">
+            <i class="icon fa fa-shopping-cart"></i> ${_("Shopping Cart")}
+          </a>
+        </li>
+      </ol>
+    % endif
+  % else:
+  <nav aria-label="Main">
     <ol class="left nav-global">
       <%block name="navigation_global_links">
         % if microsite.get_value('ENABLE_MKTG_SITE', settings.FEATURES.get('ENABLE_MKTG_SITE', False)):
@@ -113,7 +115,9 @@ site_status_msg = get_site_status_msg(course_id)
         % endif
       </%block>
     </ol>
+  </nav>
 
+  <nav aria-label="Account Management">
     <div class="right nav-courseware">
       % if not settings.FEATURES['DISABLE_LOGIN_BUTTON']:
         % if course and settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD') and course.enrollment_domain:
@@ -136,8 +140,8 @@ site_status_msg = get_site_status_msg(course_id)
         % endif
       </div>
     </div>
-    % endif
   </nav>
+  % endif
 </header>
 % if course:
 <!--[if lte IE 8]>
