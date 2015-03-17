@@ -50,7 +50,7 @@ site_status_msg = get_site_status_msg(course_id)
   % endif
 
   % if user.is_authenticated():
-  <nav aria-label="Main">
+  <nav aria-label="Main" class="nav-main">
     <div class="left nav-global authenticated">
       <%block name="navigation_global_links_authenticated">
           <li class="nav-global-01">
@@ -71,9 +71,7 @@ site_status_msg = get_site_status_msg(course_id)
       <a href="${reverse('dashboard')}" class="user-link">
         <i class="icon fa fa-home" aria-hidden="true"></i>
         <span class="sr">${_("Dashboard for:")}</span>
-        <div>
-        ${user.username}
-        </div>
+        <div>${user.username}</div>
       </a>
     </li>
     <li class="primary">
@@ -90,19 +88,20 @@ site_status_msg = get_site_status_msg(course_id)
   </ol>
 
     % if should_display_shopping_cart_func(): # see shoppingcart.context_processor.user_has_cart_context_processor
-      <ol class="user">
-        <li class="primary">
-          <a class="shopping-cart" href="${reverse('shoppingcart.views.show_cart')}">
-            <i class="icon fa fa-shopping-cart"></i> ${_("Shopping Cart")}
-          </a>
-        </li>
-      </ol>
+  <ol class="user">
+    <li class="primary">
+      <a class="shopping-cart" href="${reverse('shoppingcart.views.show_cart')}">
+        <i class="icon fa fa-shopping-cart"></i> ${_("Shopping Cart")}
+      </a>
+    </li>
+  </ol>
     % endif
+
   % else:
-  <nav aria-label="Main">
+    % if microsite.get_value('ENABLE_MKTG_SITE', settings.FEATURES.get('ENABLE_MKTG_SITE', False)):
+  <nav aria-label="Main" class="nav-main">
     <ol class="left nav-global">
       <%block name="navigation_global_links">
-        % if microsite.get_value('ENABLE_MKTG_SITE', settings.FEATURES.get('ENABLE_MKTG_SITE', False)):
           <li class="nav-global-01">
             <a href="${marketing_link('HOW_IT_WORKS')}">${_("How it Works")}</a>
           </li>
@@ -112,12 +111,12 @@ site_status_msg = get_site_status_msg(course_id)
           <li class="nav-global-03">
             <a href="${marketing_link('SCHOOLS')}">${_("Schools & Partners")}</a>
           </li>
-        % endif
       </%block>
     </ol>
   </nav>
+    % endif
 
-  <nav aria-label="Account Management">
+  <nav aria-label="Account Management" class="nav-account-management">
     <div class="right nav-courseware">
       % if not settings.FEATURES['DISABLE_LOGIN_BUTTON']:
         % if course and settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD') and course.enrollment_domain:
