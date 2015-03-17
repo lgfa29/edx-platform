@@ -126,22 +126,6 @@ class CohortConfigurationTest(UniqueCourseTest, CohortTestMixin):
         )
         group_settings_page.wait_for_page()
 
-    def test_link_to_studio(self):
-        """
-        Scenario: a link is present from the cohort configuration in the instructor dashboard
-        to the Studio Advanced Settings.
-
-        Given I have a course with a cohort defined
-        When I view the cohort in the LMS instructor dashboard
-        There is a link to take me to the Studio Advanced Settings for the course
-        """
-        self.cohort_management_page.select_cohort(self.manual_cohort_name)
-        self.cohort_management_page.select_edit_settings()
-        advanced_settings_page = AdvancedSettingsPage(
-            self.browser, self.course_info['org'], self.course_info['number'], self.course_info['run']
-        )
-        advanced_settings_page.wait_for_page()
-
     def test_add_students_to_cohort_success(self):
         """
         Scenario: When students are added to a cohort, the appropriate notification is shown.
