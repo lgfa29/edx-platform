@@ -356,11 +356,22 @@ header.global-new {
     height: 74px;
     margin: 0 auto;
     padding: 17px 0;
+
+    &.nav-main {
+      width: grid-width(6);
+      margin-left: 150px;
+    }
+
+    &.nav-account-management {
+      @include float(right);
+      width: grid-width(6);
+      margin-right: 55px;
+    }
   }
 
   h1.logo {
     @include float(left);
-    margin: -2px 39px 0 10px;
+    margin: 17px 39px 0 54px;
     position: relative;
 
     a {
