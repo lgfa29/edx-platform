@@ -1105,7 +1105,9 @@
 
     .discussions-wrapper {
       @extend %ui-no-list;
+      max-height: 400px;
       padding: 0 ($baseline/2);
+      overflow-y: scroll;
 
       .subcategories {
         padding: 0 ($baseline*1.5);
