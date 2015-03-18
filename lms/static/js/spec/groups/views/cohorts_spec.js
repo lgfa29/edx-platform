@@ -6,7 +6,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
         'js/groups/views/cohort_discussions_inline'
         ],
     function (Backbone, $, AjaxHelpers, TemplateHelpers, CohortsView, CohortCollection, ContentGroupModel,
-              CourseCohortSettingsModel, AnimationUtil, Qubit, CourseCohortSettingsNotificationView, CohortDiscussionsModel,
+              CourseCohortSettingsModel, AnimationUtil, Qubit, CourseCohortSettingsNotificationView, DiscussionTopicsSettingsModel,
               CohortDiscussionsView, CohortCourseWideDiscussionsView, CohortInlineDiscussionsView) {
         'use strict';
 
@@ -18,8 +18,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                 clearContentGroup, saveFormAndExpectErrors, createMockCohortSettings, MOCK_COHORTED_USER_PARTITION_ID,
                 MOCK_UPLOAD_COHORTS_CSV_URL, MOCK_STUDIO_ADVANCED_SETTINGS_URL, MOCK_STUDIO_GROUP_CONFIGURATIONS_URL,
                 MOCK_MANUAL_ASSIGNMENT, MOCK_RANDOM_ASSIGNMENT, createMockCohortDiscussionsJson,
-                createMockCohortDiscussions, showAndAssertDiscussionTopics, courseWideDiscussionsView,
-                inlineDiscussionsView;
+                createMockCohortDiscussions, showAndAssertDiscussionTopics;
 
             // Selectors
             var discussionsToggle ='.toggle-cohort-management-discussions',
@@ -125,7 +124,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
             };
 
             createMockCohortDiscussions = function () {
-                return new CohortDiscussionsModel(
+                return new DiscussionTopicsSettingsModel(
                     createMockCohortDiscussionsJson()
                 );
             };
@@ -1229,6 +1228,8 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
 
                     it('shows always cohort radio button as selected', function() {
                         createInlineView(this);
+                        inlineView.$('.check-all-inline-discussions').prop('checked', 'checked').change();
+
                         // verify always cohort inline discussions is being selected.
                         expect(inlineView.$('.check-all-inline-discussions').prop('checked')).toBeTruthy();
 
@@ -1238,6 +1239,21 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
 
                         // verify that cohort some topics are not being selected.
                         expect(inlineView.$('.check-cohort-inline-discussions').prop('checked')).toBeFalsy();
+                    });
+
+                    it('shows cohort some topics radio button as selected', function() {
+                        createInlineView(this);
+                        inlineView.$('.check-cohort-inline-discussions').prop('checked', 'checked').change();
+
+                        // verify some cohort inline discussions radio is being selected.
+                        expect(inlineView.$('.check-cohort-inline-discussions').prop('checked')).toBeTruthy();
+
+                        // verify always cohort radio is not selected.
+                        expect(inlineView.$('.check-all-inline-discussions').prop('checked')).toBeFalsy();
+
+                        // verify that inline topics are enabled
+                        expect(inlineView.$('.check-discussion-subcategory-inline').prop('disabled')).toBeFalsy();
+                        expect(inlineView.$('.check-discussion-category').prop('disabled')).toBeFalsy();
                     });
 
                     it('has cohorted and non-cohorted topics', function() {
@@ -1286,6 +1302,37 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         expect(inlineView.$(inlineDiscussionsSaveButtonCss).prop('disabled')).toBeTruthy();
                         verifyMessage('Changes Saved.', 'confirmation');
                     });
+
+                    it('selects the parent category when all children are selected', function() {
+                        createInlineView(this);
+                        enableSaveButton();
+
+                        // parent category should be indeterminate.
+                        expect(inlineView.$('.check-discussion-category:checked').length).toBe(0);
+                        expect(inlineView.$('.check-discussion-category:indeterminate').length).toBe(1);
+
+                        inlineView.$('.check-discussion-subcategory-inline').prop('checked', 'checked').change();
+                        // parent should be checked as we checked all children
+                        expect(inlineView.$('.check-discussion-category:checked').length).toBe(1);
+                    });
+
+                    it('selects/deselects all children when a parent category is selected/deselected', function() {
+                        createInlineView(this);
+                        enableSaveButton();
+
+                        expect(inlineView.$('.check-discussion-category:checked').length).toBe(0);
+
+                        inlineView.$('.check-discussion-category').prop('checked', 'checked').change();
+
+                        expect(inlineView.$('.check-discussion-category:checked').length).toBe(1);
+                        expect(inlineView.$('.check-discussion-subcategory-inline:checked').length).toBe(2);
+
+                        // un-check the parent, all children should be unchecd.
+                        inlineView.$('.check-discussion-category').prop('checked', false).change();
+                        expect(inlineView.$('.check-discussion-category:checked').length).toBe(0);
+                        expect(inlineView.$('.check-discussion-subcategory-inline:checked').length).toBe(0);
+                    });
+
 
                     it('shows an appropriate message when subsequent "GET" returns HTTP500', function() {
                         createInlineView(this);

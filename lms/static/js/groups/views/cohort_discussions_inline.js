@@ -39,7 +39,7 @@ var edx = edx || {};
             // When attached to a jQuery element it listens for change events to
             // input[type=checkbox] elements, and updates the checked and indeterminate
             // based on the checked values of any checkboxes in child elements of the DOM.
-            $('ul.inline-topics').qubit();
+            this.$('ul.inline-topics').qubit();
 
             this.setElementsEnabled(alwaysCohortInlineDiscussions, true);
         },
