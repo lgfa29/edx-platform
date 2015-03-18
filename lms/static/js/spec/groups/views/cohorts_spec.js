@@ -85,42 +85,42 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
 
             createMockCohortDiscussionsJson = function () {
                 return {
-                            course_wide_discussions: {
-                                children: ['Topic_C_1', 'Topic_C_2'],
+                    course_wide_discussions: {
+                        children: ['Topic_C_1', 'Topic_C_2'],
+                        entries: {
+                            Topic_C_1: {
+                               sort_key: null,
+                               is_cohorted: true,
+                               id: 'Topic_C_1'
+                            },
+                            Topic_C_2: {
+                                sort_key: null,
+                                is_cohorted: false,
+                                id: 'Topic_C_2'
+                            }
+                        }
+                    },
+                    inline_discussions: {
+                        subcategories: {
+                            Topic_I_1: {
+                                subcategories: {},
+                                children: ['Inline_Discussion_1', 'Inline_Discussion_2'],
                                 entries: {
-                                    Topic_C_1: {
-                                       sort_key: null,
-                                       is_cohorted: true,
-                                       id: 'Topic_C_1'
+                                    Inline_Discussion_1: {
+                                        sort_key: null,
+                                        is_cohorted: true,
+                                        id: 'Inline_Discussion_1'
                                     },
-                                    Topic_C_2: {
+                                    Inline_Discussion_2: {
                                         sort_key: null,
                                         is_cohorted: false,
-                                        id: 'Topic_C_2'
+                                        id: 'Inline_Discussion_2'
                                     }
                                 }
-                            },
-                            inline_discussions: {
-                                subcategories: {
-                                    Topic_I_1: {
-                                        subcategories: {},
-                                        children: ['Inline_Discussion_1', 'Inline_Discussion_2'],
-                                        entries: {
-                                            Inline_Discussion_1: {
-                                                sort_key: null,
-                                                is_cohorted: true,
-                                                id: 'Inline_Discussion_1'
-                                            },
-                                            Inline_Discussion_2: {
-                                                sort_key: null,
-                                                is_cohorted: false,
-                                                id: 'Inline_Discussion_2'
-                                            }
-                                        }
-                                    }
-                                },
-                                children: ['Topic_I_1']
                             }
+                        },
+                        children: ['Topic_I_1']
+                    }
                 };
             };
 
@@ -149,7 +149,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                     contentGroups: contentGroups,
                     cohortSettings: cohortSettings,
                     context: {
-                        discussionTopicsModel: cohortDiscussions,
+                        discussionTopicsSettingsModel: cohortDiscussions,
                         uploadCohortsCsvUrl: MOCK_UPLOAD_COHORTS_CSV_URL,
                         studioAdvancedSettingsUrl: MOCK_STUDIO_ADVANCED_SETTINGS_URL,
                         studioGroupConfigurationsUrl: MOCK_STUDIO_GROUP_CONFIGURATIONS_URL
@@ -1082,7 +1082,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
 
                     courseWideView = new CohortCourseWideDiscussionsView({
                         el: cohortsView.$('.cohort-discussions-nav').removeClass('is-hidden'),
-                        model: cohortsView.context.discussionTopicsModel,
+                        model: cohortsView.context.discussionTopicsSettingsModel,
                         cohortSettings: cohortsView.cohortSettings
                     });
                     courseWideView.render();
@@ -1093,7 +1093,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
 
                     inlineView = new CohortInlineDiscussionsView({
                         el: cohortsView.$('.cohort-discussions-nav').removeClass('is-hidden'),
-                        model: cohortsView.context.discussionTopicsModel,
+                        model: cohortsView.context.discussionTopicsSettingsModel,
                         cohortSettings: cohortsView.cohortSettings
                     });
                     inlineView.render();
@@ -1104,18 +1104,18 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                     expect(view.$('.check-discussion-subcategory-' + type + ':checked').length).toBe(1);
                 };
 
-                it("view renders properly", function() {
+                it('renders the view properly', function() {
                     showAndAssertDiscussionTopics(this);
                 });
 
                 describe("Course Wide", function() {
 
-                    it("save button is disabled initially", function() {
+                    it('shows the "Save" button as disabled initially', function() {
                         createCourseWideView(this);
                         expect(courseWideView.$(courseWideDiscussionsSaveButtonCss).prop('disabled')).toBeTruthy();
                     });
 
-                    it("has one cohorted and one non-cohorted topic", function() {
+                    it('has one cohorted and one non-cohorted topic', function() {
                         createCourseWideView(this);
 
                         assertCohortedTopics(courseWideView, 'course-wide');
@@ -1124,7 +1124,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         expect(courseWideView.$('.cohorted-text.hidden').length).toBe(1);
                     });
 
-                    it("save button enabled after changing checkbox", function() {
+                    it('enables the "Save" button after changing checkbox', function() {
                         createCourseWideView(this);
 
                         // save button is disabled.
@@ -1136,7 +1136,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         expect(courseWideView.$(courseWideDiscussionsSaveButtonCss).prop('disabled')).toBeFalsy();
                     });
 
-                    it("save the topics", function() {
+                    it('saves the topic successfully', function() {
                         createCourseWideView(this);
 
                         $(courseWideView.$('.check-discussion-subcategory-course-wide')[1]).prop('checked', 'checked').change();
@@ -1169,6 +1169,35 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         verifyMessage('Changes Saved.', 'confirmation');
                     });
 
+                    it('shows an appropriate message when subsequent "GET" returns HTTP500', function() {
+                        createCourseWideView(this);
+
+                        $(courseWideView.$('.check-discussion-subcategory-course-wide')[1]).prop('checked', 'checked').change();
+                        expect(courseWideView.$(courseWideDiscussionsSaveButtonCss).prop('disabled')).toBeFalsy();
+
+                        // Save the updated settings
+                        courseWideView.$('.action-save').click();
+
+                        // fake requests for cohort settings with PATCH method.
+                        AjaxHelpers.expectJsonRequest(
+                            requests, 'PATCH', '/mock_service/cohorts/settings',
+                            {cohorted_course_wide_discussions: ['Topic_C_1', 'Topic_C_2']}
+                        );
+                        AjaxHelpers.respondWithJson(
+                            requests,
+                            {cohorted_course_wide_discussions: ['Topic_C_1', 'Topic_C_2']}
+                        );
+
+                        // fake request for discussion/topics with GET method.
+                        AjaxHelpers.expectJsonRequest(
+                            requests, 'GET', '/mock_service/cohorts/discussion/topics'
+                        );
+                        AjaxHelpers.respondWithError(requests, 500);
+
+                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again.";
+                        expect(courseWideView.$('.message-title').text().trim()).toBe(expectedTitle);
+                    });
+
                     it('shows an appropriate error message for HTTP500', function () {
                         createCourseWideView(this);
 
@@ -1176,7 +1205,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         courseWideView.$('.action-save').click();
 
                         AjaxHelpers.respondWithError(requests, 500);
-                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again."
+                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again.";
                         expect(courseWideView.$('.message-title').text().trim()).toBe(expectedTitle);
                     });
                 });
@@ -1193,12 +1222,12 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         expect(inlineView.$(inlineDiscussionsSaveButtonCss).prop('disabled')).toBeFalsy();
                     };
 
-                    it("save button is disabled initially", function() {
+                    it('shows the "Save" button as disabled initially', function() {
                         createInlineView(this);
                         expect(inlineView.$(inlineDiscussionsSaveButtonCss).prop('disabled')).toBeTruthy();
                     });
 
-                    it("always cohort radio button is selected", function() {
+                    it('shows always cohort radio button as selected', function() {
                         createInlineView(this);
                         // verify always cohort inline discussions is being selected.
                         expect(inlineView.$('.check-all-inline-discussions').prop('checked')).toBeTruthy();
@@ -1211,18 +1240,18 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         expect(inlineView.$('.check-cohort-inline-discussions').prop('checked')).toBeFalsy();
                     });
 
-                    it("has cohorted and non-cohorted topic", function() {
+                    it('has cohorted and non-cohorted topics', function() {
                         createInlineView(this);
                         enableSaveButton();
                         assertCohortedTopics(inlineView, 'inline');
                     });
 
-                    it("save button enabled after changing from always inline option", function() {
+                    it('enables "Save" button after changing from always inline option', function() {
                         createInlineView(this);
                         enableSaveButton();
                     });
 
-                    it("save the topics", function() {
+                    it('saves the topic', function() {
                         createInlineView(this);
                         enableSaveButton();
 
@@ -1258,6 +1287,38 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         verifyMessage('Changes Saved.', 'confirmation');
                     });
 
+                    it('shows an appropriate message when subsequent "GET" returns HTTP500', function() {
+                        createInlineView(this);
+                        enableSaveButton();
+
+                        // Save the updated settings
+                        inlineView.$('.action-save').click();
+
+                        AjaxHelpers.expectJsonRequest(
+                            requests, 'PATCH', '/mock_service/cohorts/settings',
+                            {
+                                cohorted_inline_discussions: ['Inline_Discussion_1'],
+                                always_cohort_inline_discussions: false
+                            }
+                        );
+                        AjaxHelpers.respondWithJson(
+                            requests,
+                            {
+                                cohorted_inline_discussions: ['Inline_Discussion_1'],
+                                always_cohort_inline_discussions: false
+                            }
+                        );
+
+                        // fake request for discussion/topics with GET method.
+                        AjaxHelpers.expectJsonRequest(
+                            requests, 'GET', '/mock_service/cohorts/discussion/topics'
+                        );
+                        AjaxHelpers.respondWithError(requests, 500);
+
+                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again.";
+                        expect(inlineView.$('.message-title').text().trim()).toBe(expectedTitle);
+                    });
+
                     it('shows an appropriate error message for HTTP500', function () {
                         createInlineView(this);
                         enableSaveButton();
@@ -1266,7 +1327,7 @@ define(['backbone', 'jquery', 'js/common_helpers/ajax_helpers', 'js/common_helpe
                         inlineView.$('.action-save').click();
 
                         AjaxHelpers.respondWithError(requests, 500);
-                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again."
+                        var expectedTitle = "We've encountered an error. Refresh your browser and then try again.";
                         expect(inlineView.$('.message-title').text().trim()).toBe(expectedTitle);
                     });
 
