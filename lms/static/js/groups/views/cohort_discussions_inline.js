@@ -22,10 +22,18 @@ var edx = edx || {};
         render: function () {
             var alwaysCohortInlineDiscussions = this.cohortSettings.get('always_cohort_inline_discussions');
 
-            this.$('.cohort-inline-discussions-nav').html(this.template({
-                inlineDiscussionTopics: this.getInlineDiscussionsHtml(this.model.get('inline_discussions')),
-                alwaysCohortInlineDiscussions:alwaysCohortInlineDiscussions
-            }));
+            if (this.model.get('inline_discussions').children.length) {
+                this.$('.cohort-inline-discussions-nav').html(this.template({
+                    inlineDiscussionTopics: this.getInlineDiscussionsHtml(this.model.get('inline_discussions')),
+                    alwaysCohortInlineDiscussions:alwaysCohortInlineDiscussions
+                }));
+            } else {
+                this.showMessage(
+                    gettext('No content-specific discussion topics exist.'),
+                    this.$('.cohort-inline-discussions-nav'),
+                    'warning'
+                );
+            }
 
             // Provides the semantics for a nested list of tri-state checkboxes.
             // When attached to a jQuery element it listens for change events to
